@@ -42,6 +42,13 @@ def _get_snowflake_connection():
     }
     return snowflake.connector.connect(**connection_params)
 
+# Execute a SQL query on a Snowflake database and return the results as a pandas DataFrame.
+def run_query(query):
+    conn = _get_snowflake_connection()
+    df = pd.read_sql(query, conn)
+    conn.close()
+    return df
+
 ## Q1 - Top 10 Sectors by Position
 
 # title
