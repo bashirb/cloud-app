@@ -21,24 +21,16 @@ def load_query_from_file(file_path):
         query = file.read()
     return query
 
-# Function to load Snowflake credentials from secrets.toml
-def _load_snowflake_credentials(file_path='secrets.toml'):
-    with open(file_path, 'rb') as f:
-        config = tomli.load(f)
-    snowflake_config = config.get('snowflake', {})
-    return snowflake_config
-
 # Snowflake connection
 def _get_snowflake_connection():
-    credentials = _load_snowflake_credentials()
-    connection_params = {
-        "user": credentials.get("user_name"),
-        "password": credentials.get("password"),
-        "account": credentials.get("account"),
-        "database": credentials.get("database"),
-        "schema": credentials.get("schema"),
-        "warehouse": credentials.get("warehouse"),
-        "role": credentials.get("role"),
+    credentials = {
+        "user": st.secrets("user_name"),
+        "password": st.secrets("password"),
+        "account": st.secrets("account"),
+        "database": st.secrets("database"),
+        "schema": st.secrets("schema"),
+        "warehouse": st.secrets("warehouse"),
+        "role": st.secrets("role"),
     }
     return snowflake.connector.connect(**connection_params)
 
