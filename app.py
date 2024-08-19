@@ -21,18 +21,28 @@ def load_query_from_file(file_path):
         query = file.read()
     return query
 
+# Function to load Snowflake credentials from Streamlit secrets
+def _load_snowflake_credentials():
+    snowflake_config = st.secrets.get('snowflake', {})
+    return snowflake_config
+
 # Snowflake connection
 def _get_snowflake_connection():
-    credentials = {
-        "user": st.secrets("user_name"),
-        "password": st.secrets("password"),
-        "account": st.secrets("account"),
-        "database": st.secrets("database"),
-        "schema": st.secrets("schema"),
-        "warehouse": st.secrets("warehouse"),
-        "role": st.secrets("role"),
+    credentials = _load_snowflake_credentials()
+    connection_params = {
+        "user": credentials.get("user_name"),
+        "password": credentials.get("password"),
+        "account": credentials.get("account"),
+        "database": credentials.get("database"),
+        "schema": credentials.get("schema"),
+        "warehouse": credentials.get("warehouse"),
+        "role": credentials.get("role"),
     }
-    return snowflake.connector.connect(**connection_params)
+    try:
+        return snowflake.connector.connect(**connection_params)
+    except Exception as e:
+        st.error(f"An error occurred while connecting to Snowflake: {e}")
+        return None
 
 # Execute a SQL query on a Snowflake database and return the results as a pandas DataFrame.
 def run_query(query):
