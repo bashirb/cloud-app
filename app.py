@@ -16,15 +16,13 @@ st.write("## Financial Market Analysis Dashboard")
 st.divider()
 
 # Function to load SQL query from a file
-def load_query_from_file(file_path):
+def get_query_from_file(file_path):
     with open(file_path, 'r') as file:
         query = file.read()
     return query
 
-# Function to load Snowflake credentials from Streamlit secrets
-def _load_snowflake_credentials():
-    snowflake_config = st.secrets.get('snowflake', {})
-    return snowflake_config
+# Initialize connection.
+conn = st.connection("snowflake")
 
 # Snowflake connection
 def _get_snowflake_connection():
@@ -44,12 +42,16 @@ def _get_snowflake_connection():
         st.error(f"An error occurred while connecting to Snowflake: {e}")
         return None
 
-# Execute a SQL query on a Snowflake database and return the results as a pandas DataFrame.
-def run_query(query):
-    conn = _get_snowflake_connection()
-    df = pd.read_sql(query, conn)
-    conn.close()
-    return df
+# Function to execute query from SQL file
+def load_query_from_file(file_path):
+    query = get_query_from_file(file_path)
+    try:
+        # Execute query
+        df = conn.query(query, ttl=600)
+        return df
+    except Exception as e:
+        st.error(f"An error occurred while executing the query: {e}")
+        return None
 
 ## Q1 - Top 10 Sectors by Position
 
